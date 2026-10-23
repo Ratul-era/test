@@ -258,6 +258,23 @@
 </div>
 
 <script>
+ const fetchMethods = [
+      // Method 0: Instant Local GitHub Action File (Zero CORS / Zero Delay)
+      async () => {
+        const res = await fetch(`./videos.json?t=${Date.now()}`);
+        if (!res.ok) throw new Error('Local videos.json not found yet');
+        const data = await res.json();
+        return data.slice(0, 3).map(v => ({
+          id: v.id,
+          title: v.title,
+          dateFormatted: formatDate(v.published),
+          viewsFormatted: formatViews(v.views),
+          thumbnail: `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`
+        }));
+      },
+      // ... keep Method 1, 2, 3 below as backup!
+
+  
   const PLAYLIST_ID = 'UUpnU9f5UwOw8Jfa9iEKlqBQ';
   const rssUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${PLAYLIST_ID}`;
 
