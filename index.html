@@ -4,103 +4,433 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Heaven Architects</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+Bengali:wght@500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-  body { margin: 0; font-family: Arial, sans-serif; padding: 40px 20px; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: #090a0f;
+    background-image: radial-gradient(circle at 20% 20%, rgba(160, 20, 40, 0.14), transparent 45%);
+    color: #ffffff;
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Bengali', Arial, sans-serif;
+    padding: 50px 20px;
+    min-height: 100vh;
+  }
+
   #youtube-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    max-width: 1200px;
+    gap: 26px;
+    max-width: 1240px;
     margin: 0 auto;
   }
-  .yt-box { background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; position: relative; }
-  .yt-box iframe { width: 100%; height: 100%; border: 0; }
-  @media (max-width: 768px) { #youtube-row { grid-template-columns: 1fr; } }
+
+  /* Card Container */
+  .yt-card {
+    background: #101216;
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
+    border-radius: 26px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.25s ease;
+  }
+
+  /* Active State (2nd Photo) */
+  .yt-card.is-playing {
+    border-color: #9e1b32;
+    box-shadow: 0 12px 38px rgba(255, 0, 51, 0.14);
+  }
+
+  /* Video / Thumbnail Area */
+  .yt-media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: #000;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .yt-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .yt-media:hover .yt-thumb {
+    transform: scale(1.03);
+  }
+
+  /* Bottom dark gradient fade on thumbnail */
+  .yt-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.05) 55%, rgba(16,18,22,0.85) 100%);
+    pointer-events: none;
+  }
+
+  .yt-card.is-playing .yt-media::after {
+    display: none;
+  }
+
+  /* Top-left "VIDEO 01" Pill Badge */
+  .yt-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: #ff0033;
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    padding: 7px 15px;
+    border-radius: 999px;
+    z-index: 2;
+    text-transform: uppercase;
+  }
+
+  /* Center Red Play Circle */
+  .yt-play-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 68px;
+    height: 68px;
+    background: #ff0033;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 8px 25px rgba(255, 0, 51, 0.45);
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+
+  .yt-media:hover .yt-play-overlay {
+    transform: translate(-50%, -50%) scale(1.08);
+    background: #ff1a47;
+  }
+
+  .yt-play-overlay svg {
+    width: 22px;
+    height: 22px;
+    fill: #ffffff;
+    margin-left: 3px;
+  }
+
+  /* Embedded YouTube Iframe */
+  .yt-media iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  /* Card Text Body */
+  .yt-body {
+    padding: 22px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  /* Date & Views Row */
+  .yt-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #7b808c;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+  }
+
+  /* Video Title */
+  .yt-title {
+    font-size: 19px;
+    line-height: 1.45;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 24px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.9em;
+    transition: color 0.3s ease;
+  }
+
+  /* Gold/Cream Title when Playing (Matches 2nd Photo) */
+  .yt-card.is-playing .yt-title {
+    color: #f3d49b;
+  }
+
+  /* Bottom Footer Divider & Actions */
+  .yt-footer {
+    margin-top: auto;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    letter-spacing: 2.2px;
+  }
+
+  .yt-play-trigger {
+    background: none;
+    border: none;
+    color: #e6c587;
+    font-family: inherit;
+    font-size: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    text-transform: uppercase;
+  }
+
+  .yt-play-trigger:hover {
+    color: #ffe0a3;
+  }
+
+  .yt-play-trigger .tri-icon {
+    font-size: 11px;
+  }
+
+  /* Underlined "PLAYING NOW" state in 2nd photo */
+  .yt-card.is-playing .yt-play-trigger {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+  }
+
+  .yt-external-link {
+    color: #8c909e;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+
+  .yt-external-link:hover {
+    color: #ffffff;
+  }
+
+  .yt-external-link .arrow-up {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  @media (max-width: 992px) {
+    #youtube-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 680px) {
+    #youtube-row {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 </head>
 <body>
 
 <div id="youtube-row">
-  <div class="yt-box">
-    <iframe referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
-  </div>
-  <div class="yt-box">
-    <iframe referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
-  </div>
-  <div class="yt-box">
-    <iframe referrerpolicy="strict-origin-when-cross-origin" allowfullscreen loading="lazy"></iframe>
-  </div>
+  <!-- 3 Cards will be rendered here automatically -->
 </div>
 
 <script>
   const PLAYLIST_ID = 'UUpnU9f5UwOw8Jfa9iEKlqBQ';
   const rssUrl = `https://www.youtube.com/feeds/videos.xml?playlist_id=${PLAYLIST_ID}`;
 
-  // Extract 11-character YouTube video IDs directly from raw XML text
-  function extractVideoIdsFromXml(xmlText) {
-    const matches = [...xmlText.matchAll(/<yt:videoId>([^<]+)<\/yt:videoId>/g)];
-    return matches.map(m => m[1]).slice(0, 3);
+  // Format date like "Oct 21, 2026"
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  // Format views with commas like "1,240 views"
+  function formatViews(views) {
+    const num = Number(views);
+    if (isNaN(num)) return '0 views';
+    return `${num.toLocaleString('en-US')} views`;
+  }
+
+  // Parse raw YouTube RSS XML to extract video ID, Title, Date, and Views
+  function parseYouTubeXml(xmlText) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+    const entries = Array.from(xmlDoc.querySelectorAll('entry')).slice(0, 3);
+
+    return entries.map(entry => {
+      const id = (entry.getElementsByTagName('yt:videoId')[0]?.textContent || '').trim();
+      const title = (entry.querySelector('title')?.textContent || '').trim();
+      const published = entry.querySelector('published')?.textContent || '';
+      const statsEl = entry.getElementsByTagName('media:statistics')[0];
+      const views = statsEl ? statsEl.getAttribute('views') : '0';
+
+      return {
+        id,
+        title,
+        dateFormatted: formatDate(published),
+        viewsFormatted: formatViews(views),
+        thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+      };
+    }).filter(v => v.id);
+  }
+
+  // Render the 3 cards into #youtube-row
+  function renderCards(videos) {
+    const container = document.getElementById('youtube-row');
+    container.innerHTML = '';
+
+    videos.forEach((video, idx) => {
+      const badgeNumber = String(idx + 1).padStart(2, '0');
+      const card = document.createElement('div');
+      card.className = 'yt-card';
+
+      // Store template for resetting back to thumbnail when another card plays
+      const thumbnailMarkup = `
+        <span class="yt-badge">VIDEO ${badgeNumber}</span>
+        <img class="yt-thumb" src="${video.thumbnail}" alt="Video Thumbnail" loading="lazy">
+        <div class="yt-play-overlay" aria-label="Play Video">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+      `;
+
+      card.innerHTML = `
+        <div class="yt-media">
+          ${thumbnailMarkup}
+        </div>
+        <div class="yt-body">
+          <div class="yt-meta">
+            <span>${video.dateFormatted}</span>
+            <span>${video.viewsFormatted}</span>
+          </div>
+          <h3 class="yt-title"></h3>
+          <div class="yt-footer">
+            <button type="button" class="yt-play-trigger">
+              <span class="tri-icon">&#9654;</span>
+              <span class="btn-label">PLAY HERE</span>
+            </button>
+            <a class="yt-external-link" href="https://www.youtube.com/watch?v=${video.id}" target="_blank" rel="noopener noreferrer">
+              <span>YOUTUBE</span>
+              <span class="arrow-up">&#8599;</span>
+            </a>
+          </div>
+        </div>
+      `;
+
+      // Set title safely via textContent so Bengali & special characters render cleanly
+      card.querySelector('.yt-title').textContent = video.title;
+
+      const mediaBox = card.querySelector('.yt-media');
+      const playBtn = card.querySelector('.yt-play-trigger');
+
+      // Store reset helper on card element
+      card._resetCard = () => {
+        if (!card.classList.contains('is-playing')) return;
+        card.classList.remove('is-playing');
+        mediaBox.innerHTML = thumbnailMarkup;
+        playBtn.innerHTML = `<span class="tri-icon">&#9654;</span><span class="btn-label">PLAY HERE</span>`;
+      };
+
+      // Trigger inline video playback (matches 2nd attached screenshot)
+      const activateVideo = () => {
+        if (card.classList.contains('is-playing')) return;
+
+        // Reset any other currently playing card first
+        document.querySelectorAll('.yt-card.is-playing').forEach(otherCard => {
+          if (otherCard !== card && otherCard._resetCard) {
+            otherCard._resetCard();
+          }
+        });
+
+        card.classList.add('is-playing');
+        playBtn.innerHTML = `<span class="btn-label">PLAYING NOW</span>`;
+
+        mediaBox.innerHTML = `
+          <iframe
+            src="https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0"
+            title="${video.title.replace(/"/g, '&quot;')}"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen>
+          </iframe>
+        `;
+      };
+
+      mediaBox.addEventListener('click', activateVideo);
+      playBtn.addEventListener('click', activateVideo);
+
+      container.appendChild(card);
+    });
   }
 
   async function loadLatestVideos() {
-    const iframes = document.querySelectorAll('#youtube-row iframe');
-    let videoIds = [];
-
-    // List of fallback methods so if one proxy blocks github.io, the next one works
     const fetchMethods = [
-      // Method 1: CodeTabs CORS Proxy (Raw XML)
+      // Method 1: CodeTabs Proxy (Raw XML with view count + date + title)
       async () => {
         const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`);
         if (!res.ok) throw new Error('CodeTabs failed');
-        return extractVideoIdsFromXml(await res.text());
+        return parseYouTubeXml(await res.text());
       },
-      // Method 2: AllOrigins JSON Wrapper
+      // Method 2: AllOrigins JSON Wrapper (Raw XML inside .contents)
       async () => {
         const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
         if (!res.ok) throw new Error('AllOrigins failed');
         const data = await res.json();
-        return extractVideoIdsFromXml(data.contents);
+        return parseYouTubeXml(data.contents);
       },
-      // Method 3: rss2json
+      // Method 3: rss2json Fallback
       async () => {
         const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
         if (!res.ok) throw new Error('rss2json failed');
         const data = await res.json();
         return data.items.slice(0, 3).map(item => {
           const match = (item.link || '').match(/[?&]v=([^&]+)/);
-          return match ? match[1] : item.guid.split(':').pop();
+          const id = match ? match[1] : item.guid.split(':').pop();
+          return {
+            id,
+            title: item.title,
+            dateFormatted: formatDate(item.pubDate),
+            viewsFormatted: 'Latest Upload',
+            thumbnail: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+          };
         });
       }
     ];
 
     for (const method of fetchMethods) {
       try {
-        const ids = await method();
-        if (ids && ids.length > 0) {
-          videoIds = ids;
-          break;
+        const videos = await method();
+        if (videos && videos.length > 0) {
+          renderCards(videos);
+          return;
         }
       } catch (err) {
         console.warn('Proxy attempt failed, trying next...', err);
       }
     }
-
-    // Fallback: If all proxies are down, at least render the playlist so boxes aren't black
-    if (videoIds.length === 0) {
-      console.error('All proxies failed. Falling back to default playlist embed.');
-      iframes.forEach((iframe, i) => {
-        iframe.src = `https://www.youtube.com/embed/videoseries?list=${PLAYLIST_ID}&index=${i}`;
-      });
-      return;
-    }
-
-    // Populate the 3 iframes with the 3 distinct video IDs
-    videoIds.forEach((id, index) => {
-      if (iframes[index] && id) {
-        iframes[index].src = `https://www.youtube.com/embed/${id}`;
-        iframes[index].allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-      }
-    });
   }
 
   loadLatestVideos();
