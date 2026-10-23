@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Heaven Architects</title>
 <style>
-  body { margin:0; font-family: Arial, sans-serif; padding:40px 20px; }
+  body { margin: 0; font-family: Arial, sans-serif; padding: 40px 20px; }
   #youtube-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -13,28 +13,45 @@
     max-width: 1200px;
     margin: 0 auto;
   }
-  .yt-box { background:#000; border-radius:12px; overflow:hidden; aspect-ratio:16/9; }
-  .yt-box iframe { width:100%; height:100%; border:0; }
-  @media (max-width:768px) { #youtube-row { grid-template-columns:1fr; } }
+  .yt-box { background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
+  .yt-box iframe { width: 100%; height: 100%; border: 0; }
+  @media (max-width: 768px) { #youtube-row { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
+
 <div id="youtube-row">
-  <div class="yt-box">
-    <iframe src="https://www.youtube.com/embed/videoseries?list=UUpnU9f5UwOw8Jfa9iEKlqBQ" 
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-      allowfullscreen loading="lazy"></iframe>
-  </div>
-  <div class="yt-box">
-    <iframe src="https://www.youtube.com/embed/videoseries?list=UUpnU9f5UwOw8Jfa9iEKlqBQ&amp;index=2" 
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-      allowfullscreen loading="lazy"></iframe>
-  </div>
-  <div class="yt-box">
-    <iframe src="https://www.youtube.com/embed/videoseries?list=UUpnU9f5UwOw8Jfa9iEKlqBQ&amp;index=3" 
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-      allowfullscreen loading="lazy"></iframe>
-  </div>
+  <div class="yt-box"><iframe allowfullscreen loading="lazy"></iframe></div>
+  <div class="yt-box"><iframe allowfullscreen loading="lazy"></iframe></div>
+  <div class="yt-box"><iframe allowfullscreen loading="lazy"></iframe></div>
 </div>
+
+<script>
+  // Your Channel ID (Replacing the 'UU' prefix from your playlist with 'UC')
+  const CHANNEL_ID = 'UCpnU9f5UwOw8Jfa9iEKlqBQ';
+  
+  // Convert the YouTube XML RSS feed into JSON via rss2json so the browser can read it
+  const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
+  const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      const iframes = document.querySelectorAll('#youtube-row iframe');
+      
+      // Loop through the first 3 videos and set each iframe's src
+      data.items.slice(0, 3).forEach((item, index) => {
+        // item.guid is formatted like "yt:video:VIDEO_ID"
+        const videoId = item.guid.split(':')[2];
+        
+        if (iframes[index] && videoId) {
+          iframes[index].src = `https://www.youtube.com/embed/${videoId}`;
+          iframes[index].allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        }
+      });
+    })
+    .catch(error => console.error('Error loading YouTube videos:', error));
+</script>
+
 </body>
 </html>
